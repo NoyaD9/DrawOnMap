@@ -7,3 +7,16 @@
 /build
 /captures
 .externalNativeBuild
+gradlew
+gradlew.bat
+gradle.properties
+.idea/gradle.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/runConfigurations.xml
+.idea/vcs.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/sonarlint
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+
