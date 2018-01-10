@@ -5,7 +5,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.Projection
 import com.google.android.gms.maps.model.LatLng
 
-class MapProjectionPointConverter(private val map: GoogleMap) : PointToLatLngConverter {
+internal class MapProjectionPointConverter(private val map: GoogleMap) : PointToLatLngConverter {
 
   override fun toLatLng(point: Pair<Int, Int>): LatLng {
     return map.projection.fromScreenLocation(point)

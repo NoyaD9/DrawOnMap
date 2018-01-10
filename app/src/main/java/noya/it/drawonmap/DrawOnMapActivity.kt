@@ -2,7 +2,6 @@ package noya.it.drawonmap
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import com.google.android.gms.maps.GoogleMap
@@ -45,13 +44,6 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
     undoButton = findViewById(R.id.button_delete)
     undoButton.setOnClickListener {
       presenter.undo()
-    }
-  }
-
-  private fun printPolygons(polygons: List<MutableCollection<Pair<Int, Int>>>) {
-    Log.d("captor", "polygons: ${polygons.size}")
-    polygons.forEach { it ->
-      Log.d("captor", it.toString())
     }
   }
 
