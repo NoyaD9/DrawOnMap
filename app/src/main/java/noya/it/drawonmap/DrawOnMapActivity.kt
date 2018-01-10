@@ -64,14 +64,19 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
     captorView.listener = presenter
   }
 
-  override fun setEditMode(editMode: Boolean) {
-    captorView.isEditMode = editMode
-    changeEditButtonColor(editMode)
-    undoButton.visibility = if (editMode) View.VISIBLE else View.GONE
+  override fun setEditMode(isEditMode: Boolean) {
+    captorView.isEditMode = isEditMode
+    changeEditButtonColor(isEditMode)
+
   }
 
   private fun changeEditButtonColor(editMode: Boolean) {
     editButton.setImageResource(if (editMode) R.drawable.ic_check else R.drawable.ic_edit)
+  }
+
+  override fun setUndoAndDeleteButtonVisibility(isVisible: Boolean) {
+    undoButton.visibility = if (isVisible) View.VISIBLE else View.GONE
+    deleteButton.visibility = if (isVisible) View.VISIBLE else View.GONE
   }
 
   override fun drawPolygonsOnMap(polygons: List<Surface>) {

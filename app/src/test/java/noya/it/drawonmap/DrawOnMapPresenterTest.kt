@@ -121,6 +121,44 @@ class DrawOnMapPresenterTest {
     assertThat(view.polygons).isEmpty()
   }
 
+  @Test
+  fun `undo and delete buttons are visible when there's at least one polygon`() {
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(3, 4))
+
+    presenter.onFinishDrawing()
+
+    assertThat(view.undoAndDeleteButtonVisible).isTrue()
+  }
+
+
+  @Test
+  fun `hide undo and delete buttons when delete all`() {
+    view.undoAndDeleteButtonVisible = true
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onFinishDrawing()
+
+    presenter.deleteAll()
+
+    assertThat(view.undoAndDeleteButtonVisible).isFalse()
+  }
+
+  @Test
+  fun `hide undo and delete buttons when there's no polygon`() {
+    view.undoAndDeleteButtonVisible = true
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onFinishDrawing()
+
+    presenter.undo()
+
+    assertThat(view.undoAndDeleteButtonVisible).isFalse()
+  }
+
   private class SimplePointToLatLngConverter : PointToLatLngConverter {
     override fun toLatLng(point: Pair<Int, Int>): LatLng {
       return LatLng(point.first.toDouble(), point.second.toDouble())
@@ -129,11 +167,16 @@ class DrawOnMapPresenterTest {
 
   private class TestView : DrawOnMapView {
     var edit = false
+    var undoAndDeleteButtonVisible = false
     var polygons: List<Surface> = listOf()
 
 
-    override fun setEditMode(editMode: Boolean) {
-      edit = editMode
+    override fun setEditMode(isEditMode: Boolean) {
+      edit = isEditMode
+    }
+
+    override fun setUndoAndDeleteButtonVisibility(isVisible: Boolean) {
+      undoAndDeleteButtonVisible = isVisible
     }
 
     override fun drawPolygonsOnMap(polygons: List<Surface>) {

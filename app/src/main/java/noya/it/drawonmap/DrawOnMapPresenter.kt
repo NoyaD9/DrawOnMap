@@ -18,6 +18,7 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   override fun onFinishDrawing() {
     view.drawPolygonsOnMap(polygons)
     toggleEditMode()
+    view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
   }
 
   override fun onDrawPoint(point: Pair<Int, Int>) {
@@ -49,11 +50,13 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
       polygons.removeAt(polygons.lastIndex)
       view.drawPolygonsOnMap(polygons)
     }
+    view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
   }
 
   fun deleteAll() {
     polygons.clear()
     view.drawPolygonsOnMap(polygons)
+    view.setUndoAndDeleteButtonVisibility(false)
   }
 
   private fun lastItemWasAddedTooRecently(): Boolean {
