@@ -9,6 +9,7 @@ import org.junit.Before
 import org.junit.Test
 
 
+
 @Suppress("IllegalIdentifier")
 class DrawOnMapPresenterTest {
 
@@ -20,7 +21,7 @@ class DrawOnMapPresenterTest {
   @Before
   fun setUp() {
     presenter = DrawOnMapPresenter(converter, timeWrapper)
-    presenter.bind(view)
+    presenter.bind(view, null)
   }
 
   @Test
@@ -157,6 +158,24 @@ class DrawOnMapPresenterTest {
     presenter.undo()
 
     assertThat(view.undoAndDeleteButtonVisible).isFalse()
+  }
+
+  @Test
+  fun `draw polygon if provided during binding`() {
+    val poly = Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
+
+    presenter.bind(view, listOf(poly))
+
+    assertThat(view.polygons).isEqualTo(mutableListOf(poly))
+  }
+
+  @Test
+  fun `enable undo and delete buttons if binding a polygon`() {
+    val poly = Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
+
+    presenter.bind(view, listOf(poly))
+
+    assertThat(view.undoAndDeleteButtonVisible).isTrue()
   }
 
   private class SimplePointToLatLngConverter : PointToLatLngConverter {

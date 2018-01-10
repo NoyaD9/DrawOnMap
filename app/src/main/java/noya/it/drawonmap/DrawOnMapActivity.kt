@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageButton
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.gms.maps.model.PolylineOptions
@@ -14,7 +13,7 @@ import noya.it.drawonmap.model.Surface
 import noya.it.drawonmap.util.SystemTime
 
 
-class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView {
+class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   private lateinit var map: GoogleMap
   private lateinit var captorView: PolygonCaptorView
@@ -28,7 +27,13 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
     setContentView(R.layout.activity_maps)
     val mapFragment = supportFragmentManager
         .findFragmentById(R.id.map) as SupportMapFragment
-    mapFragment.getMapAsync(this)
+    mapFragment.getMapAsync { map ->
+      this.map = map
+      presenter = DrawOnMapPresenter(MapProjectionPointConverter(map), SystemTime())
+      val retainedPolygons = savedInstanceState?.getParcelableArrayList<Surface>(BUNDLE_PARCELABLE)
+      presenter.bind(this, retainedPolygons)
+      captorView.listener = presenter
+    }
     captorView = findViewById(R.id.polygonCaptor)
     initEditButton()
     initUndoButton()
@@ -57,11 +62,9 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
 
   }
 
-  override fun onMapReady(googleMap: GoogleMap) {
-    map = googleMap
-    presenter = DrawOnMapPresenter(MapProjectionPointConverter(map), SystemTime())
-    presenter.bind(this)
-    captorView.listener = presenter
+  override fun onSaveInstanceState(outState: Bundle) {
+    if (::presenter.isInitialized) outState.putParcelableArrayList(BUNDLE_PARCELABLE, ArrayList(presenter.copyOfPolygons()))
+    super.onSaveInstanceState(outState)
   }
 
   override fun setEditMode(isEditMode: Boolean) {
@@ -101,5 +104,9 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
       polylineOptions.add(it)
     }
     map.addPolyline(polylineOptions)
+  }
+
+  companion object {
+    const val BUNDLE_PARCELABLE = "BUNDLE_PARCELABLE"
   }
 }

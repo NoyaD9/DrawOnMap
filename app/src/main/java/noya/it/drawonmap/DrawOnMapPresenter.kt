@@ -36,8 +36,13 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     return true
   }
 
-  fun bind(view: DrawOnMapView) {
+  fun bind(view: DrawOnMapView, retainedPolygons: List<Surface>?) {
     this.view = view
+    retainedPolygons?.let {
+      polygons.addAll(retainedPolygons)
+      view.drawPolygonsOnMap(polygons)
+      view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+    }
   }
 
   fun toggleEditMode() {
@@ -58,6 +63,8 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     view.drawPolygonsOnMap(polygons)
     view.setUndoAndDeleteButtonVisibility(false)
   }
+
+  fun copyOfPolygons() = polygons.toList()
 
   private fun lastItemWasAddedTooRecently(): Boolean {
     val now = timeWrapper.currentTimeMillis()
