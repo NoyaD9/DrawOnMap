@@ -87,7 +87,7 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
   }
 
   override fun drawPolylineOnMap(polygons: List<Surface>) {
-    map.clear()
+    //map.clear()
     polygons.forEach {
       val polylineOptions = PolylineOptions()
           .color(R.color.colorPrimary)
