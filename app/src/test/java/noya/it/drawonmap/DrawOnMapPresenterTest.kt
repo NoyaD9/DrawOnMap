@@ -105,6 +105,22 @@ class DrawOnMapPresenterTest {
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
   }
 
+  @Test
+  fun `delete all removes all polygons`() {
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onFinishDrawing()
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(7, 8))
+    presenter.onDrawPoint(Pair(8, 9))
+    presenter.onFinishDrawing()
+
+    presenter.deleteAll()
+
+    assertThat(view.polygons).isEmpty()
+  }
+
   private class SimplePointToLatLngConverter : PointToLatLngConverter {
     override fun toLatLng(point: Pair<Int, Int>): LatLng {
       return LatLng(point.first.toDouble(), point.second.toDouble())

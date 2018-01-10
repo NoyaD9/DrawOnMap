@@ -51,6 +51,10 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     }
   }
 
+  fun deleteAll() {
+    polygons.clear()
+    view.drawPolygonsOnMap(polygons)
+  }
 
   private fun lastItemWasAddedTooRecently(): Boolean {
     val now = timeWrapper.currentTimeMillis()
@@ -64,4 +68,6 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   companion object {
     const val ADD_ELEMENT_THRESHOLD = 100
   }
+
+
 }

@@ -20,6 +20,7 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
   private lateinit var captorView: PolygonCaptorView
   private lateinit var editButton: ImageButton
   private lateinit var undoButton: View
+  private lateinit var deleteButton: View
   private lateinit var presenter: DrawOnMapPresenter
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +32,7 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
     captorView = findViewById(R.id.polygonCaptor)
     initEditButton()
     initUndoButton()
+    initDeleteButton()
   }
 
   private fun initEditButton() {
@@ -41,10 +43,18 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
   }
 
   private fun initUndoButton() {
-    undoButton = findViewById(R.id.button_delete)
+    undoButton = findViewById(R.id.button_undo)
     undoButton.setOnClickListener {
       presenter.undo()
     }
+  }
+
+  private fun initDeleteButton() {
+    deleteButton = findViewById(R.id.button_delete)
+    deleteButton.setOnClickListener {
+      presenter.deleteAll()
+    }
+
   }
 
   override fun onMapReady(googleMap: GoogleMap) {
