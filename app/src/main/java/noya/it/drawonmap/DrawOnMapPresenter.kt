@@ -79,5 +79,4 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     const val ADD_ELEMENT_THRESHOLD = 100
   }
 
-
 }
