@@ -27,6 +27,7 @@ class DrawOnMapPresenterTest {
   fun `draw a polygon`() {
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
+
     presenter.onFinishDrawing()
 
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
@@ -34,8 +35,9 @@ class DrawOnMapPresenterTest {
 
   @Test
   fun `first point must always be added`() {
-    timeWrapper.currentTime = 10
     presenter.onStartDrawing()
+    timeWrapper.currentTime = 10
+
     presenter.onDrawPoint(Pair(1, 2))
 
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
@@ -46,6 +48,7 @@ class DrawOnMapPresenterTest {
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
     timeWrapper.currentTime = 10
+
     presenter.onDrawPoint(Pair(3, 4))
 
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
@@ -56,6 +59,7 @@ class DrawOnMapPresenterTest {
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
     timeWrapper.currentTime = 101
+
     presenter.onDrawPoint(Pair(3, 4))
 
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
@@ -79,9 +83,26 @@ class DrawOnMapPresenterTest {
     presenter.toggleEditMode()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
+
     presenter.onFinishDrawing()
 
     assertThat(view.edit).isFalse()
+  }
+
+  @Test
+  fun `undo remove last added polygon`() {
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onFinishDrawing()
+    presenter.onStartDrawing()
+    presenter.onDrawPoint(Pair(7, 8))
+    presenter.onDrawPoint(Pair(8, 9))
+    presenter.onFinishDrawing()
+
+    presenter.undo()
+
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
   }
 
   private class SimplePointToLatLngConverter : PointToLatLngConverter {
@@ -92,18 +113,19 @@ class DrawOnMapPresenterTest {
 
   private class TestView : DrawOnMapView {
     var edit = false
-    var polygons: MutableList<Surface> = mutableListOf()
+    var polygons: List<Surface> = listOf()
+
 
     override fun setEditMode(editMode: Boolean) {
       edit = editMode
     }
 
     override fun drawPolygonsOnMap(polygons: List<Surface>) {
-      this.polygons = polygons.toMutableList()
+      this.polygons = polygons
     }
 
-    override fun drawPolylineOnMap(polygons: List<Surface>) {
-      this.polygons = polygons.toMutableList()
+    override fun drawPolylineOnMap(surface: Surface) {
+      polygons = listOf(surface)
     }
   }
 

@@ -22,7 +22,7 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
 
   override fun onDrawPoint(point: Pair<Int, Int>) {
     if (addPoint(point)) {
-      view.drawPolylineOnMap(polygons)
+      view.drawPolylineOnMap(polygons.last())
     }
   }
 

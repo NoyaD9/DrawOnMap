@@ -86,16 +86,13 @@ class DrawOnMapActivity : AppCompatActivity(), OnMapReadyCallback, DrawOnMapView
     }
   }
 
-  override fun drawPolylineOnMap(polygons: List<Surface>) {
-    //map.clear()
-    polygons.forEach {
-      val polylineOptions = PolylineOptions()
-          .color(R.color.colorPrimary)
-          .width(4f)
-      it.outline.forEach {
-        polylineOptions.add(it)
-      }
-      map.addPolyline(polylineOptions)
+  override fun drawPolylineOnMap(surface: Surface) {
+    val polylineOptions = PolylineOptions()
+        .color(R.color.colorPrimary)
+        .width(4f)
+    surface.outline.forEach {
+      polylineOptions.add(it)
     }
+    map.addPolyline(polylineOptions)
   }
 }
