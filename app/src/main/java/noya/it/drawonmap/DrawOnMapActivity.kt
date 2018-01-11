@@ -92,6 +92,9 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
       it.outline.forEach {
         polygonOptions.add(it)
       }
+      it.holes.forEach {
+        if (it.isNotEmpty()) polygonOptions.addHole(it)
+      }
       map.addPolygon(polygonOptions)
     }
   }

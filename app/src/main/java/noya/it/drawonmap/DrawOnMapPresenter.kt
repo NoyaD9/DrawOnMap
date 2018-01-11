@@ -1,7 +1,9 @@
 package noya.it.drawonmap
 
+import de.lighti.clipper.Clipper
 import de.lighti.clipper.DefaultClipper
 import de.lighti.clipper.Path
+import de.lighti.clipper.Paths
 import noya.it.drawonmap.converter.PointToLatLngConverter
 import noya.it.drawonmap.model.Surface
 import noya.it.drawonmap.util.TimeWrapper
@@ -18,10 +20,56 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   }
 
   override fun onFinishDrawing() {
-    simplifyLastPolygon()
+    toPolygons(unifyPolygons())
+    //simplifyLastPolygon()
     view.drawPolygonsOnMap(polygons)
     toggleEditMode()
     view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+  }
+
+  private fun unifyPolygons(): Paths {
+    val allPaths = toPaths()
+    val clip = allPaths.removeAt(allPaths.lastIndex)
+    val clipper = DefaultClipper()
+    val result = Paths()
+    clipper.addPaths(allPaths, Clipper.PolyType.SUBJECT, true)
+    clipper.addPath(clip, Clipper.PolyType.CLIP, true)
+    clipper.execute(Clipper.ClipType.UNION, result)
+    return result
+  }
+
+  private fun toPaths(): Paths {
+    val paths = Paths()
+    polygons.forEach { surface ->
+      val path = Path()
+      path.addAll(surface.outline.map { converter.toLongPoint(it) })
+      paths.add(path)
+      surface.holes.forEach {
+        if (it.isNotEmpty()) {
+          val hole = Path()
+          hole.addAll(it.map { converter.toLongPoint(it) })
+          paths.add(hole)
+        }
+      }
+    }
+    polygons.clear()
+    return paths
+  }
+
+  private fun toPolygons(paths: Paths) {
+    paths.forEach {
+      if (it.orientation()) {
+        val surface = Surface()
+        it.forEach {
+          val latLng = converter.toLatLng(Pair(it.x.toInt(), it.y.toInt()))
+          surface.addPoint(latLng)
+        }
+        polygons.add(surface)
+      } else {
+        val hole = it.map { converter.toLatLng(Pair(it.x.toInt(), it.y.toInt())) }
+        polygons.last().holes.add(hole)
+      }
+    }
   }
 
   private fun simplifyLastPolygon() {
