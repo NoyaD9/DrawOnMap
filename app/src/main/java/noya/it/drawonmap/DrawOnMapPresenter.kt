@@ -87,9 +87,9 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   private fun lastItemWasAddedTooRecently(): Boolean {
     val now = timeWrapper.currentTimeMillis()
     if (now - lastAdded <= ADD_ELEMENT_THRESHOLD) {
-      lastAdded = now
       return true
     }
+    lastAdded = now
     return false
   }
 
