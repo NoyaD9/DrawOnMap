@@ -11,6 +11,11 @@ internal class MapProjectionPointConverter(private val map: GoogleMap) : PointTo
     return map.projection.fromScreenLocation(point)
   }
 
+  override fun toLongPoint(latLng: LatLng): de.lighti.clipper.Point.LongPoint {
+    val point = map.projection.toScreenLocation(latLng)
+    return de.lighti.clipper.Point.LongPoint(point.x.toLong(), point.y.toLong())
+  }
+
   private fun Projection.fromScreenLocation(pair: Pair<Int, Int>): LatLng {
     return this.fromScreenLocation(Point(pair.first, pair.second))
   }

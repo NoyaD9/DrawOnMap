@@ -1,5 +1,7 @@
 package noya.it.drawonmap
 
+import de.lighti.clipper.DefaultClipper
+import de.lighti.clipper.Path
 import noya.it.drawonmap.converter.PointToLatLngConverter
 import noya.it.drawonmap.model.Surface
 import noya.it.drawonmap.util.TimeWrapper
@@ -16,9 +18,25 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   }
 
   override fun onFinishDrawing() {
+    simplifyLastPolygon()
     view.drawPolygonsOnMap(polygons)
     toggleEditMode()
     view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+  }
+
+  private fun simplifyLastPolygon() {
+    val lastPolygon = polygons.removeAt(polygons.lastIndex)
+    val path = Path()
+    path.addAll(lastPolygon.outline.map { converter.toLongPoint(it) })
+    val simplifiedPaths = DefaultClipper.simplifyPolygon(path)
+    simplifiedPaths.forEach {
+      val surface = Surface()
+      it.forEach {
+        val latLng = converter.toLatLng(Pair(it.x.toInt(), it.y.toInt()))
+        surface.addPoint(latLng)
+      }
+      polygons.add(surface)
+    }
   }
 
   override fun onDrawPoint(point: Pair<Int, Int>) {

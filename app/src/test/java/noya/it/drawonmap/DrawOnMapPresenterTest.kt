@@ -1,6 +1,7 @@
 package noya.it.drawonmap
 
 import com.google.android.gms.maps.model.LatLng
+import de.lighti.clipper.Point
 import noya.it.drawonmap.converter.PointToLatLngConverter
 import noya.it.drawonmap.model.Surface
 import noya.it.drawonmap.util.TimeWrapper
@@ -28,10 +29,12 @@ class DrawOnMapPresenterTest {
   fun `draw a polygon`() {
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
 
     presenter.onFinishDrawing()
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(50.0, 150.0), LatLng(20.0, 100.0)))))
   }
 
   @Test
@@ -83,7 +86,9 @@ class DrawOnMapPresenterTest {
   fun `finish edit mode when drawing is finished`() {
     presenter.toggleEditMode()
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
 
     presenter.onFinishDrawing()
 
@@ -93,29 +98,32 @@ class DrawOnMapPresenterTest {
   @Test
   fun `undo remove last added polygon`() {
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
-    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
     presenter.onFinishDrawing()
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(7, 8))
-    presenter.onDrawPoint(Pair(8, 9))
+    presenter.onDrawPoint(Pair(40, 80))
+    presenter.onDrawPoint(Pair(20, 100))
+    presenter.onDrawPoint(Pair(50, 40))
     presenter.onFinishDrawing()
 
     presenter.undo()
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(0.0, 2.0), LatLng(50.0, 150.0), LatLng(20.0, 100.0)))))
   }
 
   @Test
   fun `delete all removes all polygons`() {
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
-    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
     presenter.onFinishDrawing()
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(7, 8))
-    presenter.onDrawPoint(Pair(8, 9))
-    presenter.onFinishDrawing()
+    presenter.onDrawPoint(Pair(40, 80))
+    presenter.onDrawPoint(Pair(20, 100))
+    presenter.onDrawPoint(Pair(50, 40))
 
     presenter.deleteAll()
 
@@ -125,8 +133,9 @@ class DrawOnMapPresenterTest {
   @Test
   fun `undo and delete buttons are visible when there's at least one polygon`() {
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
-    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
 
     presenter.onFinishDrawing()
 
@@ -138,8 +147,9 @@ class DrawOnMapPresenterTest {
   fun `hide undo and delete buttons when delete all`() {
     view.undoAndDeleteButtonVisible = true
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
-    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
     presenter.onFinishDrawing()
 
     presenter.deleteAll()
@@ -151,8 +161,9 @@ class DrawOnMapPresenterTest {
   fun `hide undo and delete buttons when there's no polygon`() {
     view.undoAndDeleteButtonVisible = true
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
-    presenter.onDrawPoint(Pair(3, 4))
+    presenter.onDrawPoint(Pair(0, 2))
+    presenter.onDrawPoint(Pair(50, 150))
+    presenter.onDrawPoint(Pair(20, 100))
     presenter.onFinishDrawing()
 
     presenter.undo()
@@ -179,6 +190,10 @@ class DrawOnMapPresenterTest {
   }
 
   private class SimplePointToLatLngConverter : PointToLatLngConverter {
+    override fun toLongPoint(latLng: LatLng): Point.LongPoint {
+      return Point.LongPoint(latLng.latitude.toLong(), latLng.longitude.toLong())
+    }
+
     override fun toLatLng(point: Pair<Int, Int>): LatLng {
       return LatLng(point.first.toDouble(), point.second.toDouble())
     }
