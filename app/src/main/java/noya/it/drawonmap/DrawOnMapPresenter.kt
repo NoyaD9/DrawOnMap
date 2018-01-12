@@ -13,28 +13,27 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   lateinit private var view: DrawOnMapView
   private val polygons = mutableListOf<Surface>()
   private var lastAdded: Long = 0
-  private var isUnion = true
+  private var editState = EditState.IDLE
 
   override fun onStartDrawing() {
     polygons.add(Surface())
   }
 
   override fun onFinishDrawing() {
-    toPolygons(combinePaths(isUnion))
-    //simplifyLastPolygon()
+    toPolygons(combinePaths())
     view.drawPolygonsOnMap(polygons)
-    setEditMode(false)
+    setEditState(EditState.IDLE)
     view.setEditModeButtonsVisibility(polygons.isNotEmpty())
   }
 
-  private fun combinePaths(isUnion: Boolean): Paths {
+  private fun combinePaths(): Paths {
     val allPaths = toPaths()
     val clip = allPaths.removeAt(allPaths.lastIndex)
     val clipper = DefaultClipper()
     val result = Paths()
     clipper.addPaths(allPaths, Clipper.PolyType.SUBJECT, true)
     clipper.addPath(clip, Clipper.PolyType.CLIP, true)
-    clipper.execute(if (isUnion) Clipper.ClipType.UNION else Clipper.ClipType.DIFFERENCE, result)
+    clipper.execute(if (editState == EditState.ADD_PATH) Clipper.ClipType.UNION else Clipper.ClipType.DIFFERENCE, result)
     return result
   }
 
@@ -72,21 +71,6 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     }
   }
 
-  private fun simplifyLastPolygon() {
-    val lastPolygon = polygons.removeAt(polygons.lastIndex)
-    val path = Path()
-    path.addAll(lastPolygon.outline.map { converter.toLongPoint(it) })
-    val simplifiedPaths = DefaultClipper.simplifyPolygon(path)
-    simplifiedPaths.forEach {
-      val surface = Surface()
-      it.forEach {
-        val latLng = converter.toLatLng(Pair(it.x.toInt(), it.y.toInt()))
-        surface.addPoint(latLng)
-      }
-      polygons.add(surface)
-    }
-  }
-
   override fun onDrawPoint(point: Pair<Int, Int>) {
     if (addPoint(point)) {
       view.drawPolylineOnMap(polygons.last())
@@ -111,22 +95,52 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     }
   }
 
-  private fun setEditMode(isEditMode: Boolean) {
-    view.setEditMode(isEditMode)
+  private fun setEditState(state: EditState) {
+    when (state) {
+      EditState.IDLE -> {
+        view.highlightRemovePathButtons(false)
+        view.highlightAddPathButtons(false)
+      }
+      EditState.ADD_PATH -> {
+        view.highlightRemovePathButtons(false)
+        view.highlightAddPathButtons(true)
+      }
+      EditState.REMOVE_PATH -> {
+        view.highlightRemovePathButtons(true)
+        view.highlightAddPathButtons(false)
+      }
+    }
+    view.setEditMode(state != EditState.IDLE)
   }
 
   fun addPath() {
-    setEditMode(true)
-    isUnion = true
+    when (editState) {
+      EditState.IDLE -> {
+        editState = EditState.ADD_PATH
+      }
+      EditState.ADD_PATH -> {
+        editState = EditState.IDLE
+      }
+      EditState.REMOVE_PATH -> {
+        editState = EditState.ADD_PATH
+      }
+    }
+    setEditState(editState)
   }
 
   fun removePath() {
-    setEditMode(true)
-    isUnion = false
-  }
-
-  fun confirmPath() {
-    setEditMode(false)
+    when (editState) {
+      EditState.IDLE -> {
+        editState = EditState.REMOVE_PATH
+      }
+      EditState.ADD_PATH -> {
+        editState = EditState.REMOVE_PATH
+      }
+      EditState.REMOVE_PATH -> {
+        editState = EditState.IDLE
+      }
+    }
+    setEditState(editState)
   }
 
   fun deleteAll() {
@@ -148,6 +162,10 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
 
   companion object {
     const val ADD_ELEMENT_THRESHOLD = 100
+
+    enum class EditState {
+      IDLE, ADD_PATH, REMOVE_PATH
+    }
   }
 
 }

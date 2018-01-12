@@ -2,5 +2,5 @@
   <string name="app_name">DrawOnMap</string>
   <string name="title_activity_maps">Draw On Map</string>
   <string name="undo">undo</string>
-  <string name="setEditMode">setEditMode</string>
+  <string name="setEditState">setEditState</string>
 </resources>

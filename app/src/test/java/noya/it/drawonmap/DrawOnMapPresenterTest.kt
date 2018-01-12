@@ -108,7 +108,7 @@ class DrawOnMapPresenterTest {
     presenter.onDrawPoint(Pair(50, 40))
     presenter.onFinishDrawing()
 
-    presenter.undo()
+    presenter.removePath()
 
     assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(0.0, 2.0), LatLng(50.0, 150.0), LatLng(20.0, 100.0)))))
   }
@@ -166,7 +166,7 @@ class DrawOnMapPresenterTest {
     presenter.onDrawPoint(Pair(20, 100))
     presenter.onFinishDrawing()
 
-    presenter.undo()
+    presenter.removePath()
 
     assertThat(view.undoAndDeleteButtonVisible).isFalse()
   }
@@ -209,7 +209,7 @@ class DrawOnMapPresenterTest {
       edit = isEditMode
     }
 
-    override fun setUndoAndDeleteButtonVisibility(isVisible: Boolean) {
+    override fun setEditModeButtonsVisibility(isVisible: Boolean) {
       undoAndDeleteButtonVisible = isVisible
     }
 

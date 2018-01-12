@@ -7,4 +7,6 @@ internal interface DrawOnMapView {
   fun setEditModeButtonsVisibility(isVisible: Boolean)
   fun drawPolygonsOnMap(polygons: List<Surface>)
   fun drawPolylineOnMap(surface: Surface)
+  fun highlightAddPathButtons(isHighlighted: Boolean)
+  fun highlightRemovePathButtons(isHighlighted: Boolean)
 }
