@@ -24,32 +24,76 @@
       android:animateLayoutChanges="true"
       android:layout_gravity="top|end">
 
-    <android.support.design.widget.FloatingActionButton
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+      <ImageView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical|start"
+          android:id="@+id/ic_plus"
+          android:elevation="16dp"
+          android:layout_marginEnd="44dp"
+          android:contentDescription="@null"
+          android:src="@drawable/ic_plus"/>
+
+      <android.support.design.widget.FloatingActionButton
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:id="@+id/button_addPath"
+          android:layout_gravity="end"
+          app:backgroundTint="@android:color/white"
+          android:src="@drawable/ic_edit"/>
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button_edit"
-        app:backgroundTint="@android:color/white"
-        android:src="@drawable/ic_edit"/>
+        android:visibility="gone"
+        android:id="@+id/layout_removePath"
+        tools:visibility="visible">
+
+      <ImageView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical|start"
+          android:id="@+id/ic_minus"
+          android:elevation="16dp"
+          android:layout_marginEnd="44dp"
+          android:contentDescription="@null"
+          android:src="@drawable/ic_minus"/>
+
+      <android.support.design.widget.FloatingActionButton
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:layout_gravity="end"
+          android:id="@+id/button_removePath"
+          app:backgroundTint="@android:color/white"
+          android:src="@drawable/ic_gummi"/>
+    </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:id="@+id/button_undo"
+        android:layout_gravity="end"
+        android:id="@+id/button_delete"
         android:visibility="gone"
         tools:visibility="visible"
-        android:contentDescription="@null"
         app:backgroundTint="@android:color/white"
-        android:src="@drawable/ic_undo"/>
+        android:src="@drawable/ic_delete"/>
+
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:id="@+id/button_delete"
+        android:layout_gravity="end"
+        android:id="@+id/button_confirmPath"
         android:visibility="gone"
         tools:visibility="visible"
-        android:contentDescription="@null"
         app:backgroundTint="@android:color/white"
-        android:src="@drawable/ic_delete"/>
+        android:src="@drawable/ic_check"/>
   </LinearLayout>
 </FrameLayout>

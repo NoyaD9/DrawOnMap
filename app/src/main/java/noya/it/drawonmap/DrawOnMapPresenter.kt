@@ -11,30 +11,30 @@ import noya.it.drawonmap.util.TimeWrapper
 internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter, private val timeWrapper: TimeWrapper) : PolygonCaptorView.Listener {
 
   lateinit private var view: DrawOnMapView
-  private var isEditMode = false
   private val polygons = mutableListOf<Surface>()
   private var lastAdded: Long = 0
+  private var isUnion = true
 
   override fun onStartDrawing() {
     polygons.add(Surface())
   }
 
   override fun onFinishDrawing() {
-    toPolygons(unifyPolygons())
+    toPolygons(combinePaths(isUnion))
     //simplifyLastPolygon()
     view.drawPolygonsOnMap(polygons)
-    toggleEditMode()
-    view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+    setEditMode(false)
+    view.setEditModeButtonsVisibility(polygons.isNotEmpty())
   }
 
-  private fun unifyPolygons(): Paths {
+  private fun combinePaths(isUnion: Boolean): Paths {
     val allPaths = toPaths()
     val clip = allPaths.removeAt(allPaths.lastIndex)
     val clipper = DefaultClipper()
     val result = Paths()
     clipper.addPaths(allPaths, Clipper.PolyType.SUBJECT, true)
     clipper.addPath(clip, Clipper.PolyType.CLIP, true)
-    clipper.execute(Clipper.ClipType.UNION, result)
+    clipper.execute(if (isUnion) Clipper.ClipType.UNION else Clipper.ClipType.DIFFERENCE, result)
     return result
   }
 
@@ -107,27 +107,32 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     retainedPolygons?.let {
       polygons.addAll(retainedPolygons)
       view.drawPolygonsOnMap(polygons)
-      view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+      view.setEditModeButtonsVisibility(polygons.isNotEmpty())
     }
   }
 
-  fun toggleEditMode() {
-    isEditMode = !isEditMode
+  private fun setEditMode(isEditMode: Boolean) {
     view.setEditMode(isEditMode)
   }
 
-  fun undo() {
-    if (polygons.isNotEmpty()) {
-      polygons.removeAt(polygons.lastIndex)
-      view.drawPolygonsOnMap(polygons)
-    }
-    view.setUndoAndDeleteButtonVisibility(polygons.isNotEmpty())
+  fun addPath() {
+    setEditMode(true)
+    isUnion = true
+  }
+
+  fun removePath() {
+    setEditMode(true)
+    isUnion = false
+  }
+
+  fun confirmPath() {
+    setEditMode(false)
   }
 
   fun deleteAll() {
     polygons.clear()
     view.drawPolygonsOnMap(polygons)
-    view.setUndoAndDeleteButtonVisibility(false)
+    view.setEditModeButtonsVisibility(false)
   }
 
   fun copyOfPolygons() = polygons.toList()

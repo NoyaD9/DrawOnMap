@@ -3,7 +3,6 @@ package noya.it.drawonmap
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.ImageButton
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.PolygonOptions
@@ -17,8 +16,11 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   private lateinit var map: GoogleMap
   private lateinit var captorView: PolygonCaptorView
-  private lateinit var editButton: ImageButton
-  private lateinit var undoButton: View
+  private lateinit var addPathButton: View
+  private lateinit var addPathPlus: View
+  private lateinit var removePathButton: View
+  private lateinit var removePathMinus: View
+  private lateinit var removePathLayout: View
   private lateinit var deleteButton: View
   private lateinit var presenter: DrawOnMapPresenter
 
@@ -35,22 +37,26 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
       captorView.listener = presenter
     }
     captorView = findViewById(R.id.polygonCaptor)
-    initEditButton()
-    initUndoButton()
+    initAddPathButton()
+    initRemovePathButton()
     initDeleteButton()
   }
 
-  private fun initEditButton() {
-    editButton = findViewById(R.id.button_edit)
-    editButton.setOnClickListener {
-      presenter.toggleEditMode()
+
+  private fun initAddPathButton() {
+    addPathPlus = findViewById(R.id.ic_plus)
+    addPathButton = findViewById(R.id.button_addPath)
+    addPathButton.setOnClickListener {
+      presenter.addPath()
     }
   }
 
-  private fun initUndoButton() {
-    undoButton = findViewById(R.id.button_undo)
-    undoButton.setOnClickListener {
-      presenter.undo()
+  private fun initRemovePathButton() {
+    removePathLayout = findViewById(R.id.layout_removePath)
+    removePathMinus = findViewById(R.id.ic_minus)
+    removePathButton = findViewById(R.id.button_removePath)
+    removePathButton.setOnClickListener {
+      presenter.removePath()
     }
   }
 
@@ -69,16 +75,10 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   override fun setEditMode(isEditMode: Boolean) {
     captorView.isEditMode = isEditMode
-    changeEditButtonColor(isEditMode)
-
   }
 
-  private fun changeEditButtonColor(editMode: Boolean) {
-    editButton.setImageResource(if (editMode) R.drawable.ic_check else R.drawable.ic_edit)
-  }
-
-  override fun setUndoAndDeleteButtonVisibility(isVisible: Boolean) {
-    undoButton.visibility = if (isVisible) View.VISIBLE else View.GONE
+  override fun setEditModeButtonsVisibility(isVisible: Boolean) {
+    removePathLayout.visibility = if (isVisible) View.VISIBLE else View.GONE
     deleteButton.visibility = if (isVisible) View.VISIBLE else View.GONE
   }
 
