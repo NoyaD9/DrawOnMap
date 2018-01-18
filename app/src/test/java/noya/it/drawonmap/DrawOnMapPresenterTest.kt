@@ -27,46 +27,50 @@ class DrawOnMapPresenterTest {
 
   @Test
   fun `draw a polygon`() {
+    presenter.addPath()
     presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(1, 2))
     presenter.onDrawPoint(Pair(50, 150))
     presenter.onDrawPoint(Pair(20, 100))
+    presenter.onDrawPoint(Pair(1, 2))
 
     presenter.onFinishDrawing()
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(50.0, 150.0), LatLng(20.0, 100.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableListOf(LatLng(50.0, 150.0), LatLng(20.0, 100.0), LatLng(1.0, 2.0)))))
   }
 
   @Test
   fun `first point must always be added`() {
+    presenter.addPath()
     presenter.onStartDrawing()
     timeWrapper.currentTime = 10
 
     presenter.onDrawPoint(Pair(1, 2))
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableListOf(LatLng(1.0, 2.0)))))
   }
 
   @Test
   fun `don't add a second point if last was added too recently`() {
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
     timeWrapper.currentTime = 10
 
     presenter.onDrawPoint(Pair(3, 4))
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableListOf(LatLng(1.0, 2.0)))))
   }
 
   @Test
   fun `add a second point if above threshold`() {
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(1, 2))
     timeWrapper.currentTime = 101
 
     presenter.onDrawPoint(Pair(3, 4))
 
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
+    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableListOf(LatLng(1.0, 2.0), LatLng(3.0, 4.0)))))
   }
 
 
@@ -76,15 +80,8 @@ class DrawOnMapPresenterTest {
   }
 
   @Test
-  fun `toggle edit mode`() {
-    presenter.toggleEditMode()
-
-    assertThat(view.edit).isTrue()
-  }
-
-  @Test
   fun `finish edit mode when drawing is finished`() {
-    presenter.toggleEditMode()
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(0, 2))
     presenter.onDrawPoint(Pair(50, 150))
@@ -95,26 +92,10 @@ class DrawOnMapPresenterTest {
     assertThat(view.edit).isFalse()
   }
 
-  @Test
-  fun `undo remove last added polygon`() {
-    presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(0, 2))
-    presenter.onDrawPoint(Pair(50, 150))
-    presenter.onDrawPoint(Pair(20, 100))
-    presenter.onFinishDrawing()
-    presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(40, 80))
-    presenter.onDrawPoint(Pair(20, 100))
-    presenter.onDrawPoint(Pair(50, 40))
-    presenter.onFinishDrawing()
-
-    presenter.removePath()
-
-    assertThat(view.polygons).isEqualTo(mutableListOf(Surface(mutableSetOf(LatLng(0.0, 2.0), LatLng(50.0, 150.0), LatLng(20.0, 100.0)))))
-  }
 
   @Test
   fun `delete all removes all polygons`() {
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(0, 2))
     presenter.onDrawPoint(Pair(50, 150))
@@ -132,6 +113,7 @@ class DrawOnMapPresenterTest {
 
   @Test
   fun `undo and delete buttons are visible when there's at least one polygon`() {
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(0, 2))
     presenter.onDrawPoint(Pair(50, 150))
@@ -146,6 +128,8 @@ class DrawOnMapPresenterTest {
   @Test
   fun `hide undo and delete buttons when delete all`() {
     view.undoAndDeleteButtonVisible = true
+
+    presenter.addPath()
     presenter.onStartDrawing()
     presenter.onDrawPoint(Pair(0, 2))
     presenter.onDrawPoint(Pair(50, 150))
@@ -158,22 +142,8 @@ class DrawOnMapPresenterTest {
   }
 
   @Test
-  fun `hide undo and delete buttons when there's no polygon`() {
-    view.undoAndDeleteButtonVisible = true
-    presenter.onStartDrawing()
-    presenter.onDrawPoint(Pair(0, 2))
-    presenter.onDrawPoint(Pair(50, 150))
-    presenter.onDrawPoint(Pair(20, 100))
-    presenter.onFinishDrawing()
-
-    presenter.removePath()
-
-    assertThat(view.undoAndDeleteButtonVisible).isFalse()
-  }
-
-  @Test
   fun `draw polygon if provided during binding`() {
-    val poly = Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
+    val poly = Surface(mutableListOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
 
     presenter.bind(view, listOf(poly))
 
@@ -182,7 +152,7 @@ class DrawOnMapPresenterTest {
 
   @Test
   fun `enable undo and delete buttons if binding a polygon`() {
-    val poly = Surface(mutableSetOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
+    val poly = Surface(mutableListOf(LatLng(1.0, 2.0), LatLng(2.0, 3.0)))
 
     presenter.bind(view, listOf(poly))
 
@@ -200,10 +170,20 @@ class DrawOnMapPresenterTest {
   }
 
   private class TestView : DrawOnMapView {
+
     var edit = false
     var undoAndDeleteButtonVisible = false
     var polygons: List<Surface> = listOf()
+    var addPathHighlighted = false
+    var removePathHighlighted = false
 
+    override fun highlightAddPathButtons(isHighlighted: Boolean) {
+      addPathHighlighted = isHighlighted
+    }
+
+    override fun highlightRemovePathButtons(isHighlighted: Boolean) {
+      removePathHighlighted = isHighlighted
+    }
 
     override fun setEditMode(isEditMode: Boolean) {
       edit = isEditMode
