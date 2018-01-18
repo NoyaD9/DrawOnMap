@@ -10,10 +10,28 @@ import noya.it.drawonmap.util.TimeWrapper
 
 internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter, private val timeWrapper: TimeWrapper) : PolygonCaptorView.Listener {
 
-  lateinit private var view: DrawOnMapView
+  private lateinit var view: DrawOnMapView
   private val polygons = mutableListOf<Surface>()
   private var lastAdded: Long = 0
   private var editState = EditState.IDLE
+    set(state) {
+      field = state
+      when (state) {
+        EditState.IDLE -> {
+          view.highlightRemovePathButtons(false)
+          view.highlightAddPathButtons(false)
+        }
+        EditState.ADD_PATH -> {
+          view.highlightRemovePathButtons(false)
+          view.highlightAddPathButtons(true)
+        }
+        EditState.REMOVE_PATH -> {
+          view.highlightRemovePathButtons(true)
+          view.highlightAddPathButtons(false)
+        }
+      }
+      view.setEditMode(state != EditState.IDLE)
+    }
 
   override fun onStartDrawing() {
     polygons.add(Surface())
@@ -23,7 +41,6 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     toPolygons(combinePaths())
     view.drawPolygonsOnMap(polygons)
     editState = EditState.IDLE
-    setEditState(editState)
     view.setEditModeButtonsVisibility(polygons.isNotEmpty())
   }
 
@@ -34,7 +51,11 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     val result = Paths()
     clipper.addPaths(allPaths, Clipper.PolyType.SUBJECT, true)
     clipper.addPath(clip, Clipper.PolyType.CLIP, true)
-    clipper.execute(if (editState == EditState.ADD_PATH) Clipper.ClipType.UNION else Clipper.ClipType.DIFFERENCE, result)
+    when (editState) {
+      EditState.ADD_PATH -> clipper.execute(Clipper.ClipType.UNION, result)
+      EditState.REMOVE_PATH -> clipper.execute(Clipper.ClipType.DIFFERENCE, result)
+      else -> throw IllegalStateException("trying to combine paths in idle mode")
+    }
     return result
   }
 
@@ -96,52 +117,32 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     }
   }
 
-  private fun setEditState(state: EditState) {
-    when (state) {
-      EditState.IDLE -> {
-        view.highlightRemovePathButtons(false)
-        view.highlightAddPathButtons(false)
-      }
-      EditState.ADD_PATH -> {
-        view.highlightRemovePathButtons(false)
-        view.highlightAddPathButtons(true)
-      }
-      EditState.REMOVE_PATH -> {
-        view.highlightRemovePathButtons(true)
-        view.highlightAddPathButtons(false)
-      }
-    }
-    view.setEditMode(state != EditState.IDLE)
-  }
-
   fun addPath() {
-    when (editState) {
+    editState = when (editState) {
       EditState.IDLE -> {
-        editState = EditState.ADD_PATH
+        EditState.ADD_PATH
       }
       EditState.ADD_PATH -> {
-        editState = EditState.IDLE
+        EditState.IDLE
       }
       EditState.REMOVE_PATH -> {
-        editState = EditState.ADD_PATH
+        EditState.ADD_PATH
       }
     }
-    setEditState(editState)
   }
 
   fun removePath() {
-    when (editState) {
+    editState = when (editState) {
       EditState.IDLE -> {
-        editState = EditState.REMOVE_PATH
+        EditState.REMOVE_PATH
       }
       EditState.ADD_PATH -> {
-        editState = EditState.REMOVE_PATH
+        EditState.REMOVE_PATH
       }
       EditState.REMOVE_PATH -> {
-        editState = EditState.IDLE
+        EditState.IDLE
       }
     }
-    setEditState(editState)
   }
 
   fun deleteAll() {
