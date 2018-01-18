@@ -43,6 +43,8 @@
           android:layout_height="wrap_content"
           android:id="@+id/button_addPath"
           android:layout_gravity="end"
+          android:visibility="gone"
+          tools:visibility="visible"
           app:backgroundTint="@android:color/white"
           android:src="@drawable/ic_edit"/>
     </FrameLayout>

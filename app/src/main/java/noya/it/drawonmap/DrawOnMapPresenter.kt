@@ -22,7 +22,8 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   override fun onFinishDrawing() {
     toPolygons(combinePaths())
     view.drawPolygonsOnMap(polygons)
-    setEditState(EditState.IDLE)
+    editState = EditState.IDLE
+    setEditState(editState)
     view.setEditModeButtonsVisibility(polygons.isNotEmpty())
   }
 

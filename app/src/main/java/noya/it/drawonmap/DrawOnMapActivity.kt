@@ -38,6 +38,7 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
       val retainedPolygons = savedInstanceState?.getParcelableArrayList<Surface>(BUNDLE_PARCELABLE)
       presenter.bind(this, retainedPolygons)
       captorView.listener = presenter
+      addPathButton.visibility = View.VISIBLE
     }
     captorView = findViewById(R.id.polygonCaptor)
     initAddPathButton()
