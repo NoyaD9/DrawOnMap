@@ -9,7 +9,6 @@ internal class PolygonCaptorView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-  //var callbackPolygons: (List<MutableCollection<Pair<Int, Int>>>) -> Unit = {}
   var isEditMode = false
   var listener: Listener? = null
 
