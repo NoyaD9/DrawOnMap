@@ -100,15 +100,15 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   override fun drawPolygonsOnMap(polygons: List<Surface>) {
     map.clear()
-    polygons.forEach {
+    polygons.forEach { surface ->
       val polygonOptions = PolygonOptions()
           .strokeColor(R.color.colorPrimary)
           .strokeWidth(4f)
           .fillColor(R.color.colorPolygonShape)
-      it.outline.forEach {
+      surface.outline.forEach {
         polygonOptions.add(it)
       }
-      it.holes.forEach {
+      surface.holes.forEach {
         if (it.isNotEmpty()) polygonOptions.addHole(it)
       }
       map.addPolygon(polygonOptions)
