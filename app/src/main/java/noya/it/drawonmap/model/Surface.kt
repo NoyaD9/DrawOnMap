@@ -4,7 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.android.gms.maps.model.LatLng
 
-data class Surface(internal val outline: MutableCollection<LatLng> = mutableSetOf<LatLng>()) : Parcelable {
+data class Surface(
+    internal val outline: MutableList<LatLng> = mutableListOf(),
+    internal val holes: MutableList<List<LatLng>> = mutableListOf(listOf())) : Parcelable {
 
   fun addPoint(point: LatLng) {
     outline.add(point)
@@ -12,6 +14,10 @@ data class Surface(internal val outline: MutableCollection<LatLng> = mutableSetO
 
   override fun writeToParcel(dest: Parcel, flags: Int) {
     dest.writeTypedList(outline.toList())
+    dest.writeInt(holes.size)
+    holes.forEach {
+      dest.writeTypedList(it.toList())
+    }
   }
 
   override fun describeContents(): Int {
@@ -24,7 +30,14 @@ data class Surface(internal val outline: MutableCollection<LatLng> = mutableSetO
     override fun createFromParcel(source: Parcel): Surface {
       val outline = mutableListOf<LatLng>()
       source.readTypedList(outline, LatLng.CREATOR)
-      return Surface(outline.toMutableSet())
+      val holesSize = source.readInt()
+      val holes: MutableList<List<LatLng>> = mutableListOf()
+      for (i in 0 until holesSize) {
+        val hole = mutableListOf<LatLng>()
+        source.readTypedList(hole, LatLng.CREATOR)
+        holes.add(hole)
+      }
+      return Surface(outline, holes)
     }
   }
 }

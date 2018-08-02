@@ -1,9 +1,11 @@
 package noya.it.drawonmap
 
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.ImageButton
+import android.widget.ImageView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.PolygonOptions
@@ -17,8 +19,11 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   private lateinit var map: GoogleMap
   private lateinit var captorView: PolygonCaptorView
-  private lateinit var editButton: ImageButton
-  private lateinit var undoButton: View
+  private lateinit var addPathButton: ImageView
+  private lateinit var addPathPlus: ImageView
+  private lateinit var removePathButton: ImageView
+  private lateinit var removePathMinus: ImageView
+  private lateinit var removePathLayout: View
   private lateinit var deleteButton: View
   private lateinit var presenter: DrawOnMapPresenter
 
@@ -33,24 +38,31 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
       val retainedPolygons = savedInstanceState?.getParcelableArrayList<Surface>(BUNDLE_PARCELABLE)
       presenter.bind(this, retainedPolygons)
       captorView.listener = presenter
+      addPathButton.visibility = View.VISIBLE
     }
     captorView = findViewById(R.id.polygonCaptor)
-    initEditButton()
-    initUndoButton()
+    initAddPathButton()
+    initRemovePathButton()
     initDeleteButton()
   }
 
-  private fun initEditButton() {
-    editButton = findViewById(R.id.button_edit)
-    editButton.setOnClickListener {
-      presenter.toggleEditMode()
+
+  private fun initAddPathButton() {
+    addPathPlus = findViewById(R.id.ic_plus)
+    addPathPlus.visibility = View.GONE
+    addPathButton = findViewById(R.id.button_addPath)
+    addPathButton.setOnClickListener {
+      presenter.addPath()
     }
   }
 
-  private fun initUndoButton() {
-    undoButton = findViewById(R.id.button_undo)
-    undoButton.setOnClickListener {
-      presenter.undo()
+  private fun initRemovePathButton() {
+    removePathLayout = findViewById(R.id.layout_removePath)
+    removePathMinus = findViewById(R.id.ic_minus)
+    removePathMinus.visibility = View.GONE
+    removePathButton = findViewById(R.id.button_removePath)
+    removePathButton.setOnClickListener {
+      presenter.removePath()
     }
   }
 
@@ -69,17 +81,21 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
 
   override fun setEditMode(isEditMode: Boolean) {
     captorView.isEditMode = isEditMode
-    changeEditButtonColor(isEditMode)
-
   }
 
-  private fun changeEditButtonColor(editMode: Boolean) {
-    editButton.setImageResource(if (editMode) R.drawable.ic_check else R.drawable.ic_edit)
-  }
-
-  override fun setUndoAndDeleteButtonVisibility(isVisible: Boolean) {
-    undoButton.visibility = if (isVisible) View.VISIBLE else View.GONE
+  override fun setEditModeButtonsVisibility(isVisible: Boolean) {
+    removePathLayout.visibility = if (isVisible) View.VISIBLE else View.GONE
     deleteButton.visibility = if (isVisible) View.VISIBLE else View.GONE
+  }
+
+  override fun highlightAddPathButtons(isHighlighted: Boolean) {
+    DrawableCompat.setTint(addPathButton.drawable, ContextCompat.getColor(this, if (isHighlighted) R.color.colorAccent else android.R.color.black));
+    DrawableCompat.setTint(addPathPlus.drawable, ContextCompat.getColor(this, if (isHighlighted) R.color.colorAccent else android.R.color.black));
+  }
+
+  override fun highlightRemovePathButtons(isHighlighted: Boolean) {
+    DrawableCompat.setTint(removePathButton.drawable, ContextCompat.getColor(this, if (isHighlighted) R.color.colorAccent else android.R.color.black));
+    DrawableCompat.setTint(removePathMinus.drawable, ContextCompat.getColor(this, if (isHighlighted) R.color.colorAccent else android.R.color.black));
   }
 
   override fun drawPolygonsOnMap(polygons: List<Surface>) {
@@ -91,6 +107,9 @@ class DrawOnMapActivity : AppCompatActivity(), DrawOnMapView {
           .fillColor(R.color.colorPolygonShape)
       it.outline.forEach {
         polygonOptions.add(it)
+      }
+      it.holes.forEach {
+        if (it.isNotEmpty()) polygonOptions.addHole(it)
       }
       map.addPolygon(polygonOptions)
     }
