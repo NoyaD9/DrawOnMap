@@ -5,6 +5,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
+/**
+ * When you put this view on top of another view, it will consume touch events, given the isEditMode flag is set to true
+ * and fire the appropriate callback of its Listener
+ */
 internal class PolygonCaptorView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {

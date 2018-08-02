@@ -5,6 +5,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.Projection
 import com.google.android.gms.maps.model.LatLng
 
+/**
+ *  Utility class to convert from GoogleMap LatLng coordinates to Clipper library LongPoint
+ */
 internal class MapProjectionPointConverter(private val map: GoogleMap) : PointToLatLngConverter {
 
   override fun toLatLng(point: Pair<Int, Int>): LatLng {
