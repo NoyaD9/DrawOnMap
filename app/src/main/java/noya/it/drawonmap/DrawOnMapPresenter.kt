@@ -100,10 +100,10 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   }
 
   private fun addPoint(point: Pair<Int, Int>): Boolean {
-    val newPoint = converter.toLatLng(point)
     if (!polygons.last().outline.isEmpty() && lastItemWasAddedTooRecently()) {
       return false
     }
+    val newPoint = converter.toLatLng(point)
     polygons.last().addPoint(newPoint)
     return true
   }
