@@ -44,13 +44,23 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
     view.setEditModeButtonsVisibility(polygons.isNotEmpty())
   }
 
+  /**
+   * Clipping works using a subject and a clip path
+   * in this case the subject includes all except the last added path which is the clip path.
+   *
+   * According to the edit state, clipping will be executing using UNION or DIFFERENCE.
+   *
+   * UNION will combine the subject with the clip
+   * DIFFERENCE will subtract clip to the subject
+   *
+   */
   private fun combinePaths(): Paths {
     val allPaths = toPaths()
-    val clip = allPaths.removeAt(allPaths.lastIndex)
+    val lastPath = allPaths.removeAt(allPaths.lastIndex)
     val clipper = DefaultClipper()
     val result = Paths()
     clipper.addPaths(allPaths, Clipper.PolyType.SUBJECT, true)
-    clipper.addPath(clip, Clipper.PolyType.CLIP, true)
+    clipper.addPath(lastPath, Clipper.PolyType.CLIP, true)
     when (editState) {
       EditState.ADD_PATH -> clipper.execute(Clipper.ClipType.UNION, result)
       EditState.REMOVE_PATH -> clipper.execute(Clipper.ClipType.DIFFERENCE, result)
