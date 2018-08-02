@@ -65,10 +65,10 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
       val path = Path()
       path.addAll(surface.outline.map { converter.toLongPoint(it) })
       paths.add(path)
-      surface.holes.forEach {
-        if (it.isNotEmpty()) {
+      surface.holes.forEach { latLngList ->
+        if (latLngList.isNotEmpty()) {
           val hole = Path()
-          hole.addAll(it.map { converter.toLongPoint(it) })
+          hole.addAll(latLngList.map { converter.toLongPoint(it) })
           paths.add(hole)
         }
       }
@@ -78,16 +78,16 @@ internal class DrawOnMapPresenter(private val converter: PointToLatLngConverter,
   }
 
   private fun toPolygons(paths: Paths) {
-    paths.forEach {
-      if (it.orientation()) {
+    paths.forEach { path ->
+      if (path.orientation()) {
         val surface = Surface()
-        it.forEach {
+        path.forEach {
           val latLng = converter.toLatLng(Pair(it.x.toInt(), it.y.toInt()))
           surface.addPoint(latLng)
         }
         polygons.add(surface)
       } else {
-        val hole = it.map { converter.toLatLng(Pair(it.x.toInt(), it.y.toInt())) }
+        val hole = path.map { converter.toLatLng(Pair(it.x.toInt(), it.y.toInt())) }
         polygons.last().holes.add(hole)
       }
     }
