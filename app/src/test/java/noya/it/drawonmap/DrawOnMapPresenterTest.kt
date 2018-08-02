@@ -9,9 +9,6 @@ import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-
-
-@Suppress("IllegalIdentifier")
 class DrawOnMapPresenterTest {
 
   private lateinit var presenter: DrawOnMapPresenter
